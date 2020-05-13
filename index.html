@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pharmacy</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="button.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body> 
+    <div class="container-fluid"> 
+        
+        <div class="row" style="background-color: #404040;">
+            <div class="col-lg-2" style="text-align: center; " >
+                <button class="icon-btn add-btn">
+                    <div class="add-icon"></div>
+                    <div class="btn-txt">Add</div>
+                </button>
+                <button class="icon-btn add-btn">  
+                    <div class="btn-txt">Remove</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8" style="background-color: #404040; ">
+                <svg id='pieChart' width=1000 height=1000></svg>
+            </div>
+            <div class="col-lg-4">
+                <div class="row">
+                    <div class="col-lg-12" style="background-color: red; ">
+                        <svg id='bar1' width=500 height=500></svg>
+                    </div>
+                    <div class="col-lg-12" style="background-color: blue; ">
+                        <svg id='bar1' width=500 height=500></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script >
+    
+    function postBackend(functionname, key){
+        var result;
+        jQuery.ajax({
+            async: false,
+            type: "POST",
+            url: 'backend.php',
+            dataType: 'json',
+            data: {functionname: functionname, arguments: key},
+
+            success: function (obj, textstatus) {
+                        console.log('seccess');
+                        if( !('error' in obj) ) {
+                            result = obj.result;
+                            
+                        }
+                        else {
+                            result = obj.error;
+                        }
+                    }
+        });
+        return result;
+    }
+
+    function drawPie(dataset, pieNumber){
+        console.log(dataset)
+        var pieNumber = pieNumber;
+        var piedata = Object.assign([], dataset);
+        piedata = piedata.slice(0, pieNumber);
+        
+        var pieGenerator = d3.pie()
+            .value(function(d){
+                return d.Sale;
+            })
+            .sort(function(a, b){
+                return a.Category.localeCompare(b.Category);
+            });
+     
+        
+        var arcData = pieGenerator(piedata);
+        var colorScale = d3.scaleOrdinal()
+            .domain(piedata.map(function(d){
+                
+                return d.Category;
+            }))
+            .range(d3.schemeSet3);
+        var arcGenerator = d3.arc()
+            .innerRadius(150)
+            .outerRadius(200);
+        var g = d3.select('#pieChart')
+            .append('g')
+        
+        g.selectAll('path')
+            .data(arcData)
+            .enter()
+            .append('path')
+            .attr('d', arcGenerator)
+            .style('fill', function(d){
+                return colorScale(d.data.Category);
+            })
+            .attr('transform', 'translate(' + 400 + ',' + 400 + ')')
+            
+
+    }
+    drawPie(postBackend('getCategoryByStoreID', [9]), 10);
+    drawPie(postBackend('getCategoryByStoreID', [9]), 10);
+    
+</script>
