@@ -8,16 +8,11 @@
     <script src="https://d3js.org/d3-color.v1.min.js"></script>
     <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="inputBlank.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <style>
  
-    body {
-  font-family: 'Open Sans', sans-serif;
-  
-}
 .title-holder {
   text-align: center;
 }
@@ -33,7 +28,7 @@
 
 /* legend */
 .legend {
-  font-size: 14px;
+  font-size: 24px;
 }
 rect {
   cursor: pointer; 
@@ -45,11 +40,11 @@ rect.disabled {
 
 /* chart */
 #chart {
-  height: 800px;
+
   margin: 0 auto;
   position: relative;
   display: block;
-  width: 1200px;
+
 }
 
 /* tooltip */
@@ -66,8 +61,125 @@ rect.disabled {
   top: 95px;
   width: 180px;
   z-index: 10;
+  
+}
+* { box-sizing:border-box; }
+
+/* basic stylings ------------------------------------------ */
+/* body 				 { background:url(https://scotch.io/wp-content/uploads/2014/07/61.jpg); } */
+.container-fluid 		{ 
+  font-family:'Roboto';
+  margin:30px auto 0; 
+  display:block; 
+  
+  padding:10px 50px 50px;
+}
+h2 		 { 
+  text-align:center; 
+  
+  font-weight:normal; 
+  display:block; 
+}
+h2 small { 
+  
+  font-weight:normal; 
+  display:block; 
 }
 
+
+/* form starting stylings ------------------------------- */
+.group 			  { 
+  position:relative; 
+  margin-bottom:45px; 
+  
+}
+input 				{
+  font-size:18px;
+  padding:10px 10px 10px 5px;
+  display:block;
+  width:300px;
+  border:none;
+  border-bottom:1px solid #757575;
+}
+input:focus 		{ outline:none; }
+
+/* LABEL ======================================= */
+label 				 {
+  color:#999; 
+  font-size:px;
+  font-weight:normal;
+  position:absolute;
+  pointer-events:none;
+  left:5px;
+  top:10px;
+  transition:0.2s ease all; 
+  -moz-transition:0.2s ease all; 
+  -webkit-transition:0.2s ease all;
+}
+
+/* active state */
+input:focus ~ label, input:valid ~ label 		{
+  top:-20px;
+  font-size:14px;
+  color:#5264AE;
+}
+
+/* BOTTOM BARS ================================= */
+.bar 	{ position:relative; display:block; width:300px; }
+.bar:before, .bar:after 	{
+  content:'';
+  height:2px; 
+  width:0;
+  bottom:1px; 
+  position:absolute;
+  background:#5264AE; 
+  transition:0.2s ease all; 
+  -moz-transition:0.2s ease all; 
+  -webkit-transition:0.2s ease all;
+}
+.bar:before {
+  left:50%;
+}
+.bar:after {
+  right:50%; 
+}
+
+/* active state */
+input:focus ~ .bar:before, input:focus ~ .bar:after {
+  width:50%;
+}
+
+/* HIGHLIGHTER ================================== */
+.highlight {
+  position:absolute;
+  height:60%; 
+  width:100px; 
+  top:25%; 
+  left:0;
+  pointer-events:none;
+  opacity:0.5;
+}
+
+/* active state */
+input:focus ~ .highlight {
+  -webkit-animation:inputHighlighter 0.3s ease;
+  -moz-animation:inputHighlighter 0.3s ease;
+  animation:inputHighlighter 0.3s ease;
+}
+
+/* ANIMATIONS ================ */
+@-webkit-keyframes inputHighlighter {
+	from { background:#5264AE; }
+  to 	{ width:0; background:transparent; }
+}
+@-moz-keyframes inputHighlighter {
+	from { background:#5264AE; }
+  to 	{ width:0; background:transparent; }
+}
+@keyframes inputHighlighter {
+	from { background:#5264AE; }
+  to 	{ width:0; background:transparent; }
+}
 
 </style>
 <body> 
@@ -100,186 +212,21 @@ rect.disabled {
                 <div class="col-lg-2" ></div>
             </form>
             </div>
-            <div class="title-holder">
-                <h1 class="title">Language Use in India</h1>
-                <p class="subtitle">Calculated in the Millions</p>
-            <p class="font">Uncheck labels to recalculate.</p>
+            <div class="row">
+                <div id="chart"></div>
+
             </div>
-            
-            <div id="chart"></div>
         </div>
     
-    <!-- <div class="container"> 
-
-        <div class="row">
-            
-            <div id = 'Main' class="col-lg-8" style="width:780px; height: 1000px;background-color: #404040; ">
-                <svg id='pieChart'></svg>
-            </div>
-            <div class="col-lg-4">
-                <div class="row">
-                    <div id= 'upRight' class="col-lg-12" style="width:390px; height: 500px;background-color: #404040; ">
-                        <svg id='upBarChart'></svg>
-                    </div>
-                    <div class="col-lg-12" style="height: 500px;background-color: #404040; ">
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
 </body>
 </html>
-<!-- <script >
-    var SaleID_input = document.getElementById("SaleID_input");
-    SaleID_input.addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-            event.preventDefault();
-            drawPie(postBackend('getCategoryByStoreID', [+SaleID_input.value]), 10, 'Category', 'Sale', 120, 200);
-        }
-    });
 
-    function postBackend(functionname, key){
-        var result;
-        jQuery.ajax({
-            async: false,
-            type: "POST",
-            url: 'backend.php',
-            dataType: 'json',
-            data: {functionname: functionname, arguments: key},
-
-            success: function (obj, textstatus) {
-                        console.log('seccess get data from' + ' ' +functionname);
-                        if( !('error' in obj) ) {
-                            result = obj.result;
-                            
-                        }
-                        else {
-                            result = obj.error;
-                        }
-                    }
-        });
-        return result;
-    }
-
-    function drawPie(dataset, pieNumber, key, value, innrR, outerR){
-        var piedata = Object.assign([], dataset);
-        piedata = piedata.slice(0, pieNumber);
-        
-        var pieGenerator = d3.pie()
-            .value(function(d){
-                return d[value];
-            });
-            // .sort(function(a, b){
-            //     return a[key].localeCompare(b[key]);
-            // });
-        
-        
-        var arcData = pieGenerator(piedata);
-        var colorScale = d3.scaleOrdinal()
-            .domain(piedata.map(function(d){
-                
-                return d[key];
-            }))
-            .range(d3.schemeSet3);
-        var arcGenerator = d3.arc()
-            .innerRadius(innrR)
-            .outerRadius(outerR);
-        var svg = d3.select('#pieChart')
-            .attr('width', document.getElementById('Main').style.width)
-            .attr('height', document.getElementById('Main').style.height)
-        svg.select('g')
-            .remove();
-        var g = svg
-            .append('g')
-        
-        g.selectAll('path')
-            .data(arcData)
-            .enter()
-            .append('path')
-            .attr('class', 'pie')
-            .style('fill', function(d){
-                return colorScale(d.data[key]);
-            })
-            .attr('transform', 'translate(' + 340 + ',' + 500 + ')')
-            .on('click', function(d){
-                drawBar(postBackend('getCommodityByCategory', [d.data[key]]), 5, 'Commodity', 'Sale')
-            })
-            .transition()
-            .duration(function(d, i) {
-                return i * 200;
-                })
-            .attrTween('d', function(d) {
-                var i = d3.interpolate(d.startAngle+0.1, d.endAngle);
-                return function(t) {
-                    d.endAngle = i(t);
-                    return arcGenerator(d);
-                }
-            });
-
-            
-    }
-    
-    function drawBar(dataset, barNumber, key, value){
-        
-        var barData = Object.assign([], dataset);   
-        barData = barData.slice(0, barNumber);
-        
-        salesArray = barData.map(function(d){
-            return d[value]
-        })
-  
-        var barScaleY = d3.scaleLinear()
-            .domain([Math.max.apply(Math, salesArray), 0])
-            .range([100, 450]);
-
-        var barScaleX = d3.scaleBand()
-            .domain(barData.map(function(d){
-                return d[key];
-            }))
-            .range([50, 390])
-
-        var colorScale = d3.scaleOrdinal()
-            .domain(barData.map(function(d){
-                return d[key];
-            }))
-            .range(d3.schemeOranges[barNumber]);
-        var svg = d3.select('#upBarChart')
-            .attr('width', document.getElementById('upRight').style.width)
-            .attr('height', document.getElementById('upRight').style.height)
-        svg.select('g')
-            .remove();
-        var g = svg.append('g')
-
-        g.selectAll('rect')
-            .data(barData)
-            .enter().append('rect')
-            .attr('x', function(d){
-                return barScaleX(d[key]);
-            })
-            .attr('y', function(d){
-                return barScaleY(d[value]);
-            })
-            .attr('width', 10)
-            .attr('height', function(d){
-                return barScaleY(0)-barScaleY(d[value]);
-            })
-            .style('fill', function(d){
-                return colorScale(d[key]);
-            });
-
-
-
-    }
-   
-    
-</script> -->
 <script>
     var SaleID_input = document.getElementById("SaleID_input");
     SaleID_input.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
             event.preventDefault();
-            drawPie(postBackend('getCategoryByStoreID', [+SaleID_input.value]), 10, 'Category', 'Sale', 120, 200);
+            drawPie(postBackend('getCategoryByStoreID', [+SaleID_input.value]), 20, 'Category', 'Sale', 120, 200);
         }
     });
 
@@ -310,26 +257,28 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
     var piedata = Object.assign([], dataset);
         piedata = piedata.slice(0, pieNumber);
     // chart dimensions
-    var width = 1200;
-    var height = 800;
+    var width = 1800;
+    var height = 1500;
 
     // a circle chart needs a radius
-    var radius = Math.min(width, height) / 2;
+    var radius = 500;
 
     // legend dimensions
-    var legendRectSize = 25; // defines the size of the colored squares in legend
-    var legendSpacing = 6; // defines spacing between squares
+    var legendRectSize = 30; // defines the size of the colored squares in legend
+    var legendSpacing = 12; // defines spacing between squares
 
     // define color scale
     var color = d3.scaleOrdinal(d3.schemeCategory20c);
     // more color scales: https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9
-
+    d3.select('svg')
+        .remove();
     var svg = d3.select('#chart') // select element in the DOM with id 'chart'
     .append('svg') // append an svg element to the element we've selected
     .attr('width', width) // set the width of the svg element we just added
     .attr('height', height) // set the height of the svg element we just added
     .append('g') // append 'g' element to the svg element
-    .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')'); // our reference is now to the 'g' element. centerting the 'g' element to the svg element
+    .attr('transform', 'translate(' + 700 + ',' + 900 + ')') // our reference is now to the 'g' element. centerting the 'g' element to the svg element
+    
 
     var arc = d3.arc()
     .innerRadius(0) // none for pie chart
@@ -412,7 +361,7 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
     .attr('transform', function(d, i) {                   
         var height = legendRectSize + legendSpacing; // height of element is the height of the colored square plus the spacing      
         var offset =  height * color.domain().length / 2; // vertical offset of the entire legend = height of a single element & half the total number of elements  
-        var horz = 18 * legendRectSize; // the legend is shifted to the left to make room for the text
+        var horz = 20 * legendRectSize; // the legend is shifted to the left to make room for the text
         var vert = i * height - offset; // the top of the element is hifted up or down from the center using the offset defiend earlier and the index of the current element 'i'               
         return 'translate(' + horz + ',' + vert + ')'; //return translation       
     });
@@ -461,5 +410,59 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
     .attr('x', legendRectSize + legendSpacing)
     .attr('y', legendRectSize - legendSpacing)
     .text(function(d) { return d; }); // return label
+    }
+
+
+
+    function drawBar(dataset, barNumber, key, value){
+        
+        var barData = Object.assign([], dataset);   
+        barData = barData.slice(0, barNumber);
+        
+        salesArray = barData.map(function(d){
+            return d[value]
+        })
+  
+        var barScaleY = d3.scaleLinear()
+            .domain([Math.max.apply(Math, salesArray), 0])
+            .range([100, 450]);
+
+        var barScaleX = d3.scaleBand()
+            .domain(barData.map(function(d){
+                return d[key];
+            }))
+            .range([50, 390])
+
+        var colorScale = d3.scaleOrdinal()
+            .domain(barData.map(function(d){
+                return d[key];
+            }))
+            .range(d3.schemeOranges[barNumber]);
+        var svg = d3.select('#upBarChart')
+            .attr('width', document.getElementById('upRight').style.width)
+            .attr('height', document.getElementById('upRight').style.height)
+        svg.select('g')
+            .remove();
+        var g = svg.append('g')
+
+        g.selectAll('rect')
+            .data(barData)
+            .enter().append('rect')
+            .attr('x', function(d){
+                return barScaleX(d[key]);
+            })
+            .attr('y', function(d){
+                return barScaleY(d[value]);
+            })
+            .attr('width', 10)
+            .attr('height', function(d){
+                return barScaleY(0)-barScaleY(d[value]);
+            })
+            .style('fill', function(d){
+                return colorScale(d[key]);
+            });
+
+
+
     }
 </script>
