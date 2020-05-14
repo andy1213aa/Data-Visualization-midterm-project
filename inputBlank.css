@@ -4,24 +4,23 @@
 /* body 				 { background:url(https://scotch.io/wp-content/uploads/2014/07/61.jpg); } */
 .container-fluid 		{ 
   font-family:'Roboto';
-  width:400px; 
   margin:30px auto 0; 
   display:block; 
-  background:#FFF;
+  background:#404040;
   padding:10px 50px 50px;
 }
 h2 		 { 
   text-align:center; 
   
-  margin-bottom:50px; 
-}
-h2 small { 
   font-weight:normal; 
-  color:#888; 
   display:block; 
 }
-.footer 	{ text-align:center; }
-.footer a  { color:#53B2C8; }
+h2 small { 
+  
+  font-weight:normal; 
+  display:block; 
+}
+
 
 /* form starting stylings ------------------------------- */
 .group 			  { 
@@ -42,7 +41,7 @@ input:focus 		{ outline:none; }
 /* LABEL ======================================= */
 label 				 {
   color:#999; 
-  font-size:18px;
+  font-size:px;
   font-weight:normal;
   position:absolute;
   pointer-events:none;
