@@ -220,11 +220,11 @@ input:focus ~ .highlight {
                   <div class="select">
                     <select name="slct" id="slct" >
                       <option selected disabled>Choose an option</option>
-                      <option value="1">男女</option>
-                      <option value="2">交易後庫存</option>
-                      <option value="3">售價</option>
-                      <option value="3">銷售量</option>
-                      <option value="3">總銷售額</option>
+                      <option value='男女'>男女</option>
+                      <option value="交易後庫存">交易後庫存</option>
+                      <option value="售價">售價</option>
+                      <option value="銷售量">銷售量</option>
+                      <option value="銷售額">銷售額</option>
                     </select>
                   </div>
                 </div>
@@ -243,7 +243,7 @@ input:focus ~ .highlight {
     SaleID_input.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
             event.preventDefault();
-            drawPie(postBackend('getCategoryByStoreID', [+SaleID_input.value]), 20, 'Category', 'Sale', 120, 200);
+            drawPie(postBackend('getCategoryByStoreID', [+SaleID_input.value, '總銷售額']), 10, 'Category', 'Sale', 120, 200);
         }
     });
 

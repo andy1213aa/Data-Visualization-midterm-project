@@ -1,8 +1,8 @@
 <?php
-    function getCategoryByStoreID($store){
+    function getCategoryByStoreID($store, $order){
             
         $link = mysqli_connect("localhost:3307", "mid", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
-        $sql = "SELECT 說明, 等級,SUM(銷售額) 總銷售額, SUM(交易後庫存量) 總交易後庫存量,  SUM(售價) 總售價, SUM(銷售量) 總銷售量 FROM pharmacy WHERE 銷貨倉 =" .$store. "GROUP BY 說明 ORDER BY 說明 DESC";
+        $sql = 'SELECT 說明, 等級,SUM(銷售額) 總銷售額, SUM(交易後庫存量) 總交易後庫存量,  SUM(售價) 總售價, SUM(銷售量) 總銷售量 FROM pharmacy WHERE 銷貨倉 =' .$store. ' GROUP BY 說明 ORDER BY ' .$order. ' DESC';
         $result = mysqli_query($link, $sql);
         if(!$result){
             echo ("Error: ".mysqli_error($link));
@@ -50,7 +50,7 @@
                 $aResult['error'] = 'Error in arguments!';
             }
             else {
-                $aResult['result'] = getCategoryByStoreID($_POST['arguments'][0]);
+                $aResult['result'] = getCategoryByStoreID($_POST['arguments'][0], $_POST['arguments'][1]);
             }
             break;
             case 'getCommodityByCategory':
@@ -74,7 +74,3 @@ echo json_encode($aResult);
 // 
 ?>
 
-$sql = "SELECT 性別, COUNT(*) FROM pharmacy GROUP BY 性別";
-
-
-$sql = "SELECT 等級, COUNT(等級) FROM pharmacy GROUP BY 等級";
