@@ -10,6 +10,7 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="optionSelect.css" />
 </head>
 <style>
  
@@ -213,8 +214,24 @@ input:focus ~ .highlight {
             </form>
             </div>
             <div class="row">
-                <div id="chart"></div>
-
+                <div class='col-lg-2'>
+                </div>
+                <div class='col-lg-1' height=200 >
+                  <div class="select">
+                    <select name="slct" id="slct" >
+                      <option selected disabled>Choose an option</option>
+                      <option value="1">男女</option>
+                      <option value="2">交易後庫存</option>
+                      <option value="3">售價</option>
+                      <option value="3">銷售量</option>
+                      <option value="3">總銷售額</option>
+                    </select>
+                  </div>
+                </div>
+               
+            </div>
+            <div class="row">
+                <div class="col-lg-3" id="chart"></div>
             </div>
         </div>
     
