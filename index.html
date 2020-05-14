@@ -197,17 +197,17 @@ input:focus ~ .highlight {
                 <div class="col-lg-2" ></div>
                 <div class="col-lg-8" >
                     <div class="group" >      
-                        <input id='SaleID_input' type="text" required >
+                        <input id='ID_input' type="text" required >
                         <span class="highlight"></span>
                         <span class="bar"></span>
-                        <label >銷貨倉號碼</label>
+                        <label >Store ID</label>
                     </div>
                  
                     <div class="group">      
-                        <input type="text" required>
+                        <input id='time_input' type="text" required>
                         <span class="highlight"></span>
                         <span class="bar"></span>
-                        <label>Nothing Will Happen</label>
+                        <label>YYYY-MM-DD~YYYY-MM-DD</label>
                     </div>
                 </div>   
                 <div class="col-lg-2" ></div>
@@ -240,11 +240,33 @@ input:focus ~ .highlight {
 </html>
 
 <script>
-    var SaleID_input = document.getElementById("SaleID_input");
-    SaleID_input.addEventListener("keyup", function(event) {
+    var ID_input = document.getElementById("ID_input");
+    var time_input = document.getElementById("time_input");
+    var storeID = 1;
+    var timeSeries = '2018-1-1~2018-12-31';
+    var selection = '總銷售量';
+    
+    $('#slct').change(function(){
+      selection = $('#slct').val();
+      drawPie(postBackend('getCategoryByStoreID', [+ID_input.value, selection]), 10, 'Category', 'Sale', 120, 200);
+    })
+
+    ID_input.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
             event.preventDefault();
-            drawPie(postBackend('getCategoryByStoreID', [+SaleID_input.value, '總銷售額']), 10, 'Category', 'Sale', 120, 200);
+            storeID = ID_input.value;
+            drawPie(postBackend('getCategoryByStoreID', [+ID_input.value, selection]), 10, 'Category', 'Sale', 120, 200);
+        }
+    });
+    
+    
+    time_input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            var timeSeries = time_input.value;
+            var from = time_input.value.slice(0, 8);
+            var to = time_input.value.slice(9);
+            drawPie(postBackend('getCategoryByStoreID', [+ID_input.value, selection]), 10, 'Category', 'Sale', 120, 200);
         }
     });
 
@@ -253,7 +275,7 @@ input:focus ~ .highlight {
         jQuery.ajax({
             async: false,
             type: "POST",
-            url: 'backend.php',
+            url: 'backend',
             dataType: 'json',
             data: {functionname: functionname, arguments: key},
 
