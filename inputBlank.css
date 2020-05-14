@@ -2,7 +2,7 @@
 
 /* basic stylings ------------------------------------------ */
 /* body 				 { background:url(https://scotch.io/wp-content/uploads/2014/07/61.jpg); } */
-.container 		{ 
+.container-fluid 		{ 
   font-family:'Roboto';
   width:400px; 
   margin:30px auto 0; 
@@ -12,6 +12,7 @@
 }
 h2 		 { 
   text-align:center; 
+  
   margin-bottom:50px; 
 }
 h2 small { 
@@ -26,6 +27,7 @@ h2 small {
 .group 			  { 
   position:relative; 
   margin-bottom:45px; 
+  
 }
 input 				{
   font-size:18px;
