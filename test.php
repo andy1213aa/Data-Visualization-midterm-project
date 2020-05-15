@@ -18,18 +18,9 @@ function getCommodityByCategory($category){
         array_push($test, $tmp);
         
     }
-<<<<<<< HEAD
-    return $test;
-}
-
-$c = ["'牙線'"];
-$a = getCommodityByCategory($c[0]);
-$json = json_encode($a);
-=======
     
 
 
 $json = json_encode($test);
->>>>>>> home
     echo $json;
 ?>
