@@ -197,17 +197,17 @@ input:focus ~ .highlight {
                 <div class="col-lg-2" ></div>
                 <div class="col-lg-8" >
                     <div class="group" >      
-                        <input id='SaleID_input' type="text" required >
+                        <input id='ID_input' type="text" required >
                         <span class="highlight"></span>
                         <span class="bar"></span>
-                        <label >銷貨倉號碼</label>
+                        <label >Store ID</label>
                     </div>
                  
                     <div class="group">      
-                        <input type="text" required>
+                        <input id='time_input' type="text" required>
                         <span class="highlight"></span>
                         <span class="bar"></span>
-                        <label>Nothing Will Happen</label>
+                        <label>YYYY-MM-DD~YYYY-MM-DD</label>
                     </div>
                 </div>   
                 <div class="col-lg-2" ></div>
@@ -240,11 +240,34 @@ input:focus ~ .highlight {
 </html>
 
 <script>
-    var SaleID_input = document.getElementById("SaleID_input");
-    SaleID_input.addEventListener("keyup", function(event) {
+    var ID_input = document.getElementById("ID_input");
+    var time_input = document.getElementById("time_input");
+    var storeID = 1;
+    var from = '2018-1-1';
+    var to = '2018-12-31';
+    var selection = '銷售額';
+    
+    $('#slct').change(function(){
+      selection = $('#slct').val();
+      
+    })
+
+    ID_input.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
             event.preventDefault();
-            drawPie(postBackend('getCategoryByStoreID', [+SaleID_input.value, '總銷售額']), 10, 'Category', 'Sale', 120, 200);
+            storeID = ID_input.value;
+            drawPie(postBackend('getCategoryByStoreID', [selection, storeID, from, to]), 10);
+        }
+    });
+    
+    
+    time_input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            
+            var from = time_input.value.slice(0, 8);
+            var to = time_input.value.slice(9);
+            drawPie(postBackend('getCategoryByStoreID', [selection, storeID, from, to]), 10);
         }
     });
 
@@ -271,7 +294,7 @@ input:focus ~ .highlight {
         return result;
     }
 
-function drawPie(dataset, pieNumber, key, value, innrR, outerR){
+function drawPie(dataset, pieNumber){
     var piedata = Object.assign([], dataset);
         piedata = piedata.slice(0, pieNumber);
     // chart dimensions
@@ -303,7 +326,7 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
     .outerRadius(radius); // size of overall chart
 
     var pie = d3.pie() // start and end angles of the segments
-    .value(function(d) { return d[value]; }) // how to extract the numerical data from each entry in our dataset
+    .value(function(d) { return d['value']; }) // how to extract the numerical data from each entry in our dataset
     .sort(null); // by default, data sorts in oescending value. this will mess with our animation so we set it to null
 
     // define tooltip
@@ -344,19 +367,19 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
     .enter() //creates placeholder nodes for each of the values
     .append('path') // replace placeholders with path elements
     .attr('d', arc) // define d attribute with arc function above
-    .attr('fill', function(d) { return color(d.data[key]); }) // use color scale to define fill of each label in dataset
+    .attr('fill', function(d) { return color(d.data['key']); }) // use color scale to define fill of each label in dataset
     .each(function(d) { this._current - d; }); // creates a smooth animation for each track
 
     // mouse event handlers are attached to path so they need to come after its definition
     path.on('mouseover', function(d) { 
      // when mouse enters div      
     var total = d3.sum(piedata.map(function(d) { // calculate the total number of tickets in the dataset           
-        return (d.enabled) ? d[value] : 0; // checking to see if the entry is enabled. if it isn't, we return 0 and cause other percentages to increase                                      
+        return (d.enabled) ? d['value'] : 0; // checking to see if the entry is enabled. if it isn't, we return 0 and cause other percentages to increase                                      
     }));         
                                                 
-    var percent = Math.round(1000 * d.data[value] / total) / 10; // calculate percent
-    tooltip.select('.label').html(d.data[key]); // set current label           
-    tooltip.select('.count').html('$' + d.data[value]); // set current count            
+    var percent = Math.round(1000 * d.data['value'] / total) / 10; // calculate percent
+    tooltip.select('.label').html(d.data['key']); // set current label           
+    tooltip.select('.count').html('$' + d.data['value']); // set current count            
     tooltip.select('.percent').html(percent + '%'); // set percent calculated above          
     tooltip.style('display', 'block'); // set display                     
     });                                                           
@@ -406,8 +429,8 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
         }
 
         pie.value(function(d) { 
-        if (d[key] === theKey) d.enabled = enabled; // if entry label matches legend label
-            return (d.enabled) ? d[value] : 0; // update enabled property and return count or 0 based on the entry's status
+        if (d['key'] === theKey) d.enabled = enabled; // if entry label matches legend label
+            return (d.enabled) ? d['value'] : 0; // update enabled property and return count or 0 based on the entry's status
         });
 
         path = path.data(pie(piedata)); // update pie with new data
@@ -432,13 +455,13 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
 
 
 
-    function drawBar(dataset, barNumber, key, value){
+    function drawBar(dataset, barNumber){
         
         var barData = Object.assign([], dataset);   
         barData = barData.slice(0, barNumber);
         
         salesArray = barData.map(function(d){
-            return d[value]
+            return d['value']
         })
   
         var barScaleY = d3.scaleLinear()
@@ -447,13 +470,13 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
 
         var barScaleX = d3.scaleBand()
             .domain(barData.map(function(d){
-                return d[key];
+                return d['key'];
             }))
             .range([50, 390])
 
         var colorScale = d3.scaleOrdinal()
             .domain(barData.map(function(d){
-                return d[key];
+                return d['key'];
             }))
             .range(d3.schemeOranges[barNumber]);
         var svg = d3.select('#upBarChart')
@@ -467,17 +490,17 @@ function drawPie(dataset, pieNumber, key, value, innrR, outerR){
             .data(barData)
             .enter().append('rect')
             .attr('x', function(d){
-                return barScaleX(d[key]);
+                return barScaleX(d['key']);
             })
             .attr('y', function(d){
-                return barScaleY(d[value]);
+                return barScaleY(d['value']);
             })
             .attr('width', 10)
             .attr('height', function(d){
-                return barScaleY(0)-barScaleY(d[value]);
+                return barScaleY(0)-barScaleY(d['value']);
             })
             .style('fill', function(d){
-                return colorScale(d[key]);
+                return colorScale(d['key']);
             });
 
 
