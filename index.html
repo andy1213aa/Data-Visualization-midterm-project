@@ -200,7 +200,7 @@ input:focus ~ .highlight {
                         <input id='ID_input' type="text" required >
                         <span class="highlight"></span>
                         <span class="bar"></span>
-                        <label >Store ID</label>
+                        <label >銷貨倉號</label>
                     </div>
                  
                     <div class="group">      
@@ -208,6 +208,13 @@ input:focus ~ .highlight {
                         <span class="highlight"></span>
                         <span class="bar"></span>
                         <label>YYYY-MM-DD~YYYY-MM-DD</label>
+                    </div>
+
+                    <div class="group">      
+                      <input id='pieNUmber_input' type="text" required>
+                      <span class="highlight"></span>
+                      <span class="bar"></span>
+                      <label>圓餅圖切分數</label>
                     </div>
                 </div>   
                 <div class="col-lg-2" ></div>
@@ -232,6 +239,9 @@ input:focus ~ .highlight {
                
             </div>
             <div class="row">
+      
+            </div>
+            <div class="row">
                 <div class="col-lg-3" id="chart"></div>
             </div>
         </div>
@@ -240,24 +250,30 @@ input:focus ~ .highlight {
 </html>
 
 <script>
+  
+
     var ID_input = document.getElementById("ID_input");
     var time_input = document.getElementById("time_input");
     var storeID = 1;
     var from = '2018-1-1';
     var to = '2018-12-31';
     var selection = '銷售額';
-    
+    var pieNumber = 20;
+    var dataset = postBackend('getCategory', [selection, storeID, from, to])
     $('#slct').change(function(){
       selection = $('#slct').val();
       switch(selection){
         case '性別':
-          drawPie(postBackend('getSpecialKey', [selection, storeID, from, to]), 10);
+          dataset = postBackend('getSpecialKey', [selection, storeID, from, to]);
+          drawPie(dataset, pieNumber);
           break;
         case '等級':
-          drawPie(postBackend('getSpecialKey', [selection, storeID, from, to]), 10);
+          dataset = postBackend('getSpecialKey', [selection, storeID, from, to]);
+          drawPie(dataset, pieNumber);
           break;
         default:
-          drawPie(postBackend('getCategory', [selection, storeID, from, to]), 10);
+          dataset = postBackend('getCategory', [selection, storeID, from, to]);
+          drawPie(dataset, pieNumber);
           break;
       }
     })
@@ -266,7 +282,12 @@ input:focus ~ .highlight {
         if (event.keyCode === 13) {
             event.preventDefault();
             storeID = ID_input.value;
-            drawPie(postBackend('getCategory', [selection, storeID, from, to]), 10);
+            if (selection === '性別' || selection === '等級')
+              dataset = postBackend('getSpecialKey', [selection, storeID, from, to]);
+            else
+              dataset = postBackend('getCategory', [selection, storeID, from, to]);
+            
+            drawPie(dataset, pieNumber);
         }
     });
     
@@ -276,12 +297,27 @@ input:focus ~ .highlight {
             event.preventDefault();
             
             var from = time_input.value.slice(0, 10);
-            console.log(from);
             var to = time_input.value.slice(11);
-            drawPie(postBackend('getCategory', [selection, storeID, from, to]), 10);
+            if (selection === '性別' || selection === '等級')
+              dataset = postBackend('getSpecialKey', [selection, storeID, from, to]);
+            else
+              dataset = postBackend('getCategory', [selection, storeID, from, to]);
+            drawPie(dataset, pieNumber);
         }
     });
-
+    
+    pieNUmber_input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            
+            pieNumber = pieNUmber_input.value;
+            if (selection === '性別' || selection === '等級')
+              dataset = postBackend('getSpecialKey', [selection, storeID, from, to]);
+            else
+              dataset = postBackend('getCategory', [selection, storeID, from, to]);
+            drawPie(dataset, pieNumber);
+        }
+    });
     function postBackend(functionname, key){
         var result;
         jQuery.ajax({
@@ -319,7 +355,10 @@ function drawPie(dataset, pieNumber){
     // legend dimensions
     var legendRectSize = 30; // defines the size of the colored squares in legend
     var legendSpacing = 12; // defines spacing between squares
-
+    if (pieNumber >= 30){
+      legendRectSize = 18;
+      legendSpacing = 6;
+    }
     // define color scale
     var color = d3.scaleOrdinal(d3.schemePaired);
     // more color scales: https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9
@@ -405,7 +444,10 @@ function drawPie(dataset, pieNumber){
       .append('path') // replace placeholders with path elements
       .attr('d', arc) // define d attribute with arc function above
       .attr('fill', function(d) { return color(d.data['key']); }) // use color scale to define fill of each label in dataset
+      .attr('stroke', 'white')
+      .attr('stroke-width', 5)
       .each(function(d) { this._current - d; }); // creates a smooth animation for each track
+
     
     // mouse event handlers are attached to path so they need to come after its definition
     path.on('mouseover', function(d) { 
@@ -500,7 +542,7 @@ function drawPie(dataset, pieNumber){
         var offset =  height * color.domain().length / 2; // vertical offset of the entire legend = height of a single element & half the total number of elements  
         var horz = 20 * legendRectSize; // the legend is shifted to the left to make room for the text
         var vert = i * height - offset; // the top of the element is hifted up or down from the center using the offset defiend earlier and the index of the current element 'i'               
-        return 'translate(' + horz + ',' + vert + ')'; //return translation       
+        return 'translate( 600,' + vert + ')'; //return translation       
     });
 
     // adding colored squares to legend
@@ -548,6 +590,8 @@ function drawPie(dataset, pieNumber){
       .attr('x', legendRectSize + legendSpacing)
       .attr('y', legendRectSize - legendSpacing)
       .text(function(d) { return d.trim(); }); // return label
+
+    
     }
 
 
