@@ -221,8 +221,7 @@ input:focus ~ .highlight {
             </form>
             </div>
             <div class="row">
-                <div class='col-lg-2'>
-                </div>
+                <div class='col-lg-2'></div>
                 <div class='col-lg-1' height=200 >
                   <div class="select">
                     <select name="slct" id="slct" >
@@ -242,7 +241,15 @@ input:focus ~ .highlight {
       
             </div>
             <div class="row">
-                <div class="col-lg-3" id="chart"></div>
+                <div class="col-lg-2" id="chart"></div>
+                <div class='col-lg-4'></div>
+                <div class="col-lg-6">
+                  <div class="row">
+                    <div  id="barChart"></div>
+                    <div  id="aprioriBarChart"></div>
+                  </div>
+                </div>
+                <div class="col-lg-2" ></div>
             </div>
         </div>
     
@@ -362,8 +369,9 @@ function drawPie(dataset, pieNumber){
     // define color scale
     var color = d3.scaleOrdinal(d3.schemePaired);
     // more color scales: https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9
-    d3.select('svg')
-        .remove();
+    d3.select('#chart')
+      .select('svg')
+      .remove();
     var svg = d3.select('#chart') // select element in the DOM with id 'chart'
       .append('svg') // append an svg element to the element we've selected
       .attr('width', width) // set the width of the svg element we just added
@@ -445,7 +453,7 @@ function drawPie(dataset, pieNumber){
       .attr('d', arc) // define d attribute with arc function above
       .attr('fill', function(d) { return color(d.data['key']); }) // use color scale to define fill of each label in dataset
       .attr('stroke', 'white')
-      .attr('stroke-width', 5)
+      .attr('stroke-width', 2)
       .each(function(d) { this._current - d; }); // creates a smooth animation for each track
 
     
@@ -531,6 +539,18 @@ function drawPie(dataset, pieNumber){
       .style('left', (d3.event.layerX + 10) + 'px'); // always 10px to the right of the mouse
     });
 
+
+    path.on('click', function(d){
+      var bardataset = [];
+      if (selection === '性別' || selection === '等級'){
+        bardataset =  Object.assign([], dataset);
+      }else{
+        bardataset = postBackend('getCommodityByCategory', [d.data['key'], selection, storeID, from, to]);
+      }
+      
+      console.log(bardataset);
+      barChart("#barChart", bardataset, 10);
+    })
     // define legend
     var legend = svg.selectAll('.legend') // selecting elements with class 'legend'
       .data(color.domain()) // refers to an array of labels from our dataset
@@ -596,55 +616,193 @@ function drawPie(dataset, pieNumber){
 
 
 
-    function drawBar(dataset, barNumber){
-        
-        var barData = Object.assign([], dataset);   
-        barData = barData.slice(0, barNumber);
-        
-        salesArray = barData.map(function(d){
-            return d['value']
+    function barChart(drawOn, barDataset, barNumber){
+      d3.select(drawOn)
+        .select('svg')
+        .remove();
+      var svg = d3.select(drawOn)
+          .append('svg')
+          .attr('width', 1400)
+          .attr('height', 800);
+      var width = 780;
+      var height = 480;
+
+      var t1 = Object.assign([], barDataset);
+      
+      var cities = t1.slice(0,barNumber)
+      
+      cities.map(function(d, i){
+        cities[i]['key'] = cities[i]['key'].trim();
+      });
+      // for(i=0;i<10;i++){
+      // 　cities[i]['key'] = cities[i]['key'].trim();
+      // }
+      
+      
+      var fontSize = 36;
+      
+      var cityNames = cities.map(function(d) {return d['key']});
+      
+      var a = cities.map(function(d) { return Number(d['value'])});
+      var max = d3.max(a);
+      
+      var colorScale = d3.scaleOrdinal()
+          .domain(cityNames)
+          .range(d3.schemeSet3);
+      
+      var bandScale = d3.scaleBand()
+          .domain(cityNames)
+          .range([0, height])
+          .paddingOuter(0.2)
+          .paddingInner(0.2);
+      
+      
+      var pop2width = d3.scaleLinear()
+          .domain([0, max])
+          .range([0, width]);
+      
+      var xAxis = d3.axisBottom(pop2width)
+            .ticks(5)
+            .tickSize(14);
+            // .tickPadding(3);
+            // .tickFormat(d3.format(".1s"));
+                      
+      svg.append("g")
+          .classed('axis', true)
+          .attr("transform", 
+              "translate(400, " 
+              + height + ")")
+              .style('font', '24px times')
+          .call(xAxis);
+      
+      svg.append("text")             
+          .attr("transform",
+                  "translate(" + (420 + pop2width(max))+','+
+                              (height+10) + ")")
+          .attr('font-size', fontSize)                    
+          .text(function(){
+            if(drawOn === '#barChart')
+              return selection;
+            else 
+              return 'Confidence';
+          });
+      
+      var barChartG = svg.append('g');
+          // .attr('id', 'bar-chart');
+      
+      var texts = barChartG.append('g')
+          .selectAll('text')
+          .data(cities)
+          .enter().append("text")
+          .attr('id', function(d, i){
+              return drawOn.slice(1)+'number'+String(i);
+          })
+          .attr('x', 0)
+          .attr('y', function(d, i) {
+              return bandScale(d['key']);
+          })
+          .attr('font-size', fontSize)
+          // set anchor and alignment for texts
+          .attr('text-anchor', 'start')
+          .attr('alignment-baseline', 'hanging')
+          .text(function(d) {
+              var t1 = d['key'];
+              var t2;
+              if(t1.length < 10){
+                  t2 = t1;
+              }else{
+                  t2 = t1.slice(0, barNumber) + '...'
+              }
+              return t2;
+          });
+      
+      var labels = barChartG.append('g')
+          .selectAll('text')
+          .data(cities)
+          .enter().append("text")
+          .attr('id', function(d,i){ return drawOn.slice(1) + 'label'+ String(i);})
+          .attr('x', function(d){
+              return 410 + pop2width(max);
+          })
+          .attr('y', function(d, i) {
+              return bandScale(d['key']);
+          })
+          .attr('font-size', '36px')
+          // set anchor and alignment for texts
+          .attr('text-anchor', 'start')
+          .attr('alignment-baseline', 'hanging')
+          .text(function(d) {
+              return String(d['value'])
+          })
+          .style('display', "none");
+          
+      
+      var rects =  barChartG.selectAll("rect")
+          .data(cities)
+          .enter().append("rect")
+          .attr("x", 400)
+          .attr("y", function(d) {
+              return bandScale(d['key']);
+          })
+          .attr("height", bandScale.bandwidth())
+          .style("fill", function(d){
+              return colorScale(d['key']);
+          });
+      
+      var t = d3.transition()
+          // .on('start', function() { console.log("Started"); })
+          // .on('end', function() { console.log("Finished"); })
+          .delay(200)
+          .duration(1000);
+      
+      rects
+          .transition(t)
+          .attr("width", function(d, i) { 
+              return pop2width(d['value']);
+          });
+      
+      // Directly create a transition
+      // rects
+      // 	.transition()
+      // 	.delay(200)
+      // 	.duration(1000)
+      // 	.attr("width", function(d, i) { 
+      // 		return pop2width(d.population);
+      // 	});
+
+      // var rects = svg.selectAll("rect");
+      rects
+          .on('mouseover', function(d, i) {
+              var target = d3.select(drawOn).select(drawOn+'number'+String(i));
+              target.each(function(d, i) {
+                  d3.select(this).text(d['key']);
+              });
+              d3.select(drawOn).select(drawOn+'label'+ String(i)).style('display', null);
+              d3.select(this)
+                  .style('fill', '#FFFFBB')
+                  .style('opacity', 0.5);
+          })
+          .on('mouseleave', function(d, i) {
+              var target = d3.select(drawOn).select(drawOn+'number'+String(i));
+              target.each(function(d, i) {
+                  d3.select(this).text(d['key'].slice(0, barNumber) + '...');
+              });
+              d3.select(drawOn).select(drawOn+ 'label'+ String(i)).style('display', 'none');
+              d3.select(this)
+                  .style('fill', colorScale(d['key']))
+                  .style('opacity', 1);
         })
-  
-        var barScaleY = d3.scaleLinear()
-            .domain([Math.max.apply(Math, salesArray), 0])
-            .range([100, 450]);
-
-        var barScaleX = d3.scaleBand()
-            .domain(barData.map(function(d){
-                return d['key'];
-            }))
-            .range([50, 390])
-
-        var colorScale = d3.scaleOrdinal()
-            .domain(barData.map(function(d){
-                return d['key'];
-            }))
-            .range(d3.schemeOranges[barNumber]);
-        var svg = d3.select('#upBarChart')
-            .attr('width', document.getElementById('upRight').style.width)
-            .attr('height', document.getElementById('upRight').style.height)
-        svg.select('g')
-            .remove();
-        var g = svg.append('g')
-
-        g.selectAll('rect')
-            .data(barData)
-            .enter().append('rect')
-            .attr('x', function(d){
-                return barScaleX(d['key']);
-            })
-            .attr('y', function(d){
-                return barScaleY(d['value']);
-            })
-            .attr('width', 10)
-            .attr('height', function(d){
-                return barScaleY(0)-barScaleY(d['value']);
-            })
-            .style('fill', function(d){
-                return colorScale(d['key']);
-            });
+        .on('click', function(d){
+          
+          var aprioriData = postBackend('getAprioriFrimCommodity', [d['key']]);
+          console.log(aprioriData);
+          barChart("#aprioriBarChart", aprioriData, 10)
+        });
+    
+}
 
 
 
-    }
+
+    
 </script>

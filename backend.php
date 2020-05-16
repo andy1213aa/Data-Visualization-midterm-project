@@ -38,21 +38,38 @@
         return $allData;
     }
 
-    function getCommodityByCategory($category){
+    function getCommodityByCategory($key, $select, $store, $timeFrom, $timeTo){
         $link = mysqli_connect("localhost:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
-        $sql = "SELECT 藥品名稱 ,等級,SUM(銷售額) 總銷售額 FROM pharmacy WHERE 說明 = " ."'$category'". " GROUP BY 藥品名稱 ORDER BY 總銷售額 DESC";
+        $sql = 'SELECT 藥品名稱 ,SUM('.$select.') '.$select.' FROM pharmacy WHERE 說明 = ' ."'$key'". ' AND 銷貨倉 = '.$store.' AND 銷貨日期 >= '."'$timeFrom'".' AND 銷貨日期 <= '."'$timeTo'".' GROUP BY 藥品名稱 ORDER BY '.$select.' DESC';
         $commodity = mysqli_query($link, $sql);
         if(!$commodity){
             echo ("Error: ".mysqli_error($link));
             exit();
         }
-        $test = array();
+        $allData = array();
         while($row = mysqli_fetch_array($commodity)){
-            $tmp = array('key' => $row['藥品名稱'], 'value' => $row['總銷售額'], 'Rank'=>$row['等級']);
-            array_push($test, $tmp);
+            $tmp = array('key' => $row['藥品名稱'], 'value' => $row[$select]);
+            array_push($allData, $tmp);
             
         }
-        return $test;
+        return $allData;
+    }
+
+    function getAprioriFrimCommodity($key){
+        $link = mysqli_connect("localhost:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
+        $sql = 'SELECT rs , confidence FROM apriori WHERE ls = ' ."'$key'". ' ORDER BY confidence DESC';
+        $commodity = mysqli_query($link, $sql);
+        if(!$commodity){
+            echo ("Error: ".mysqli_error($link));
+            exit();
+        }
+        $allData = array();
+        while($row = mysqli_fetch_array($commodity)){
+            $tmp = array('key' => $row['rs'], 'value' => $row['confidence']);
+            array_push($allData, $tmp);
+            
+        }
+        return $allData;
     }
     header('Content-Type: application/json; charset=UTF-8');
 
@@ -78,6 +95,22 @@
                 }
                 else {
                     $aResult['result'] = getSpecialKey($_POST['arguments'][0], $_POST['arguments'][1], $_POST['arguments'][2], $_POST['arguments'][3]);
+                }
+                break;
+            case 'getCommodityByCategory':
+                if( !is_array($_POST['arguments']) ) {
+                    $aResult['error'] = 'Error in arguments!';
+                }
+                else {
+                    $aResult['result'] = getCommodityByCategory($_POST['arguments'][0], $_POST['arguments'][1], $_POST['arguments'][2], $_POST['arguments'][3], $_POST['arguments'][4]);
+                }
+                break;
+            case 'getAprioriFrimCommodity':
+                if( !is_array($_POST['arguments']) ) {
+                    $aResult['error'] = 'Error in arguments!';
+                }
+                else {
+                    $aResult['result'] = getAprioriFrimCommodity($_POST['arguments'][0]);
                 }
                 break;
             default:
