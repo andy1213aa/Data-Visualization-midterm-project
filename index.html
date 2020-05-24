@@ -207,7 +207,7 @@ input:focus ~ .highlight {
                         <input id='time_input' type="text" required>
                         <span class="highlight"></span>
                         <span class="bar"></span>
-                        <label>YYYY-MM-DD~YYYY-MM-DD</label>
+                        <label>YYYY-M-D~YYYY-M-D</label>
                     </div>
 
                     <div class="group">      
@@ -241,15 +241,18 @@ input:focus ~ .highlight {
       
             </div>
             <div class="row">
-                <div class="col-lg-2" id="chart"></div>
-                <div class='col-lg-4'></div>
-                <div class="col-lg-6">
+                
+                <div class="col-lg-4" id="chart"></div>
+                  
+                <div class='col-lg-3'>
+                </div>
+                <div class="col-lg-4">
                   <div class="row">
                     <div  id="barChart"></div>
                     <div  id="aprioriBarChart"></div>
                   </div>
                 </div>
-                <div class="col-lg-2" ></div>
+
             </div>
         </div>
     
@@ -265,9 +268,17 @@ input:focus ~ .highlight {
     var from = '2018-1-1';
     var to = '2018-12-31';
     var selection = '銷售額';
-    var pieNumber = 20;
+    var pieNumber = 10;
     var dataset = postBackend('getCategory', [selection, storeID, from, to])
     $('#slct').change(function(){
+      
+      d3.select('#barChart')
+        .select('svg')
+        .remove()
+      d3.select('#aprioriBarChart')
+        .select('svg')
+        .remove()
+
       selection = $('#slct').val();
       switch(selection){
         case '性別':
@@ -286,6 +297,13 @@ input:focus ~ .highlight {
     })
 
     ID_input.addEventListener("keyup", function(event) {
+      d3.select('#barChart')
+        .select('svg')
+        .remove()
+      d3.select('#aprioriBarChart')
+        .select('svg')
+        .remove()
+
         if (event.keyCode === 13) {
             event.preventDefault();
             storeID = ID_input.value;
@@ -300,11 +318,17 @@ input:focus ~ .highlight {
     
     
     time_input.addEventListener("keyup", function(event) {
+      d3.select('#barChart')
+        .select('svg')
+        .remove()
+      d3.select('#aprioriBarChart')
+        .select('svg')
+        .remove()
         if (event.keyCode === 13) {
             event.preventDefault();
             
-            var from = time_input.value.slice(0, 10);
-            var to = time_input.value.slice(11);
+            from = time_input.value.slice(0, 8);
+            to = time_input.value.slice(9);
             if (selection === '性別' || selection === '等級')
               dataset = postBackend('getSpecialKey', [selection, storeID, from, to]);
             else
@@ -314,6 +338,12 @@ input:focus ~ .highlight {
     });
     
     pieNUmber_input.addEventListener("keyup", function(event) {
+      d3.select('#barChart')
+        .select('svg')
+        .remove()
+      d3.select('#aprioriBarChart')
+        .select('svg')
+        .remove()
         if (event.keyCode === 13) {
             event.preventDefault();
             
@@ -351,10 +381,13 @@ input:focus ~ .highlight {
 function drawPie(dataset, pieNumber){
     var piedata = Object.assign([], dataset);
         piedata = piedata.slice(0, pieNumber);
-    console.log(piedata);
+    var count = 0;
+    piedata.map(function(d){
+      count += (+d['value'])
+    })
     // chart dimensions
     var width = 1800;
-    var height = 1500;
+    var height = 1600;
 
     // a circle chart needs a radius
     var radius = 500;
@@ -372,14 +405,16 @@ function drawPie(dataset, pieNumber){
     d3.select('#chart')
       .select('svg')
       .remove();
+
     var svg = d3.select('#chart') // select element in the DOM with id 'chart'
       .append('svg') // append an svg element to the element we've selected
       .attr('width', width) // set the width of the svg element we just added
       .attr('height', height) // set the height of the svg element we just added
       .attr('id', 'pie')
+      .style('background-color', 'green')
       .append('g') // append 'g' element to the svg element
-      .attr('transform', 'translate(' + 700 + ',' + 900 + ')') // our reference is now to the 'g' element. centerting the 'g' element to the svg element
-    
+      .attr('transform', 'translate(' + 700 + ',' + 900 + ')'); // our reference is now to the 'g' element. centerting the 'g' element to the svg element
+
     var tooltip_textKey = d3.select('#pie')
       .append('text')
       .attr('font-size', '36px')
@@ -404,6 +439,45 @@ function drawPie(dataset, pieNumber){
       .append('rect')
       .attr('fill', '#FF8000')
       .attr('fill-opacity', 0);
+
+    d3.select('#pie')
+      .append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', 450)
+      .attr('height', 450)
+      .attr('stroke', 'red')
+      .attr('stroke-width', 5)
+      .attr('fill', 'white');
+
+    var information = d3.select('#pie')
+      .attr('font-size', '36px')
+      .style('font-weight', 'bold')
+      .append('text');
+    
+    var spaceBetweenInformation = 100
+    information
+      .append('tspan')
+      .attr('id', 'tspan_ID')
+      .attr('x', 20)
+      .attr('y', spaceBetweenInformation)
+      .text('銷貨倉號: ' + storeID)
+      .append('tspan')
+      .attr('id', 'tspan_DATE')
+      .attr('x', 20)
+      .attr('y', spaceBetweenInformation*2)
+      .text('日期: ' + from + "~" + to)
+      .append('tspan')
+      .attr('id', 'tspan_CHOISE')
+      .attr('x', 20)
+      .attr('y', spaceBetweenInformation*3)
+      .text('選擇: ' + selection)
+      .append('tspan')
+      .attr('id', 'tspan_TOTAL')
+      .attr('x', 20)
+      .attr('y', spaceBetweenInformation*4)
+      .text('總數: ' + count)
+      
 
     var arc = d3.arc()
       .innerRadius(0) // none for pie chart
@@ -465,8 +539,7 @@ function drawPie(dataset, pieNumber){
       }));         
                                                   
       var percent = Math.round(1000 * d.data['value'] / total) / 10; // calculate percent
-      console.log(d.data['key'].trim().length);
-      console.log('Percentage: xx.x%'.length);
+      
       
       tooltip_rect
         .attr("x", d3.event.layerX )
@@ -548,8 +621,8 @@ function drawPie(dataset, pieNumber){
         bardataset = postBackend('getCommodityByCategory', [d.data['key'], selection, storeID, from, to]);
       }
       
-      console.log(bardataset);
-      barChart("#barChart", bardataset, 10);
+      
+      barChart("#barChart", bardataset, d.data['key'], 10);
     })
     // define legend
     var legend = svg.selectAll('.legend') // selecting elements with class 'legend'
@@ -573,18 +646,31 @@ function drawPie(dataset, pieNumber){
       .style('stroke', color) // each stroke is passed a color
       .attr('id', 'legendRect')
       .on('click', function(theKey) {
+        var theKey = theKey;
         var rect = d3.select(this); // this refers to the colored squared just clicked
         var enabled = true; // set enabled true to default
         var totalEnabled = d3.sum(piedata.map(function(d) { // can't disable all options
           return (d.enabled) ? 1 : 0; // return 1 for each enabled entry. and summing it up
         }));
-        
+        var targetValue;
+        piedata.map(function(d){
+          if(d['key'] === theKey) targetValue= +d['value'];
+        })
         if (rect.attr('class') === 'disabled') { // if class is disabled
             rect.attr('class', ''); // remove class disabled
+            
+            count += targetValue
+            d3.select('#tspan_TOTAL')
+              .text('總數: ' +count);
+         
         } else { // else
         if (totalEnabled < 2) return; // if less than two labels are flagged, exit
             rect.attr('class', 'disabled'); // otherwise flag the square disabled
             enabled = false; // set enabled to false
+            
+            count -= targetValue
+            d3.select('#tspan_TOTAL')
+              .text('總數: ' +count);
         }
 
         pie.value(function(d) { 
@@ -616,16 +702,25 @@ function drawPie(dataset, pieNumber){
 
 
 
-    function barChart(drawOn, barDataset, barNumber){
+    function barChart(drawOn, barDataset, Category, barNumber){
       d3.select(drawOn)
         .select('svg')
         .remove();
       var svg = d3.select(drawOn)
           .append('svg')
-          .attr('width', 1400)
-          .attr('height', 800);
+          .attr('width', 1500)
+          .attr('height', 800)
+          
+      svg.append('rect')
+        .attr('x',  5)
+        .attr('y', 5)
+        .attr('width', 1490)
+        .attr('height', 790)
+        .attr('fill-opacity', 0)
+        .attr('stroke', 'red')
+        .attr('stroke-width', 10);
       var width = 780;
-      var height = 480;
+      var height = 700;
 
       var t1 = Object.assign([], barDataset);
       
@@ -652,7 +747,7 @@ function drawPie(dataset, pieNumber){
       
       var bandScale = d3.scaleBand()
           .domain(cityNames)
-          .range([0, height])
+          .range([200, height])
           .paddingOuter(0.2)
           .paddingInner(0.2);
       
@@ -666,7 +761,23 @@ function drawPie(dataset, pieNumber){
             .tickSize(14);
             // .tickPadding(3);
             // .tickFormat(d3.format(".1s"));
-                      
+      svg.append('text')
+        .attr('x', 50)
+        .attr('y', 100)
+        .attr('font-size', '54px')
+        .text(function(){
+          if(drawOn === "#barChart")
+            return "商品";
+          else if(drawOn === "#aprioriBarChart")
+            return "Apriori";
+        })
+      svg.append('text')
+        .attr('x', 600)
+        .attr('y', 100)
+        .attr('font-size', '54px')
+        .style('font-weight', 'bold')
+        .text(Category);
+        
       svg.append("g")
           .classed('axis', true)
           .attr("transform", 
@@ -682,7 +793,7 @@ function drawPie(dataset, pieNumber){
           .attr('font-size', fontSize)                    
           .text(function(){
             if(drawOn === '#barChart')
-              return selection;
+              return selection + "(總數)";
             else 
               return 'Confidence';
           });
@@ -697,7 +808,7 @@ function drawPie(dataset, pieNumber){
           .attr('id', function(d, i){
               return drawOn.slice(1)+'number'+String(i);
           })
-          .attr('x', 0)
+          .attr('x', 20)
           .attr('y', function(d, i) {
               return bandScale(d['key']);
           })
@@ -795,8 +906,8 @@ function drawPie(dataset, pieNumber){
         .on('click', function(d){
           
           var aprioriData = postBackend('getAprioriFrimCommodity', [d['key']]);
-          console.log(aprioriData);
-          barChart("#aprioriBarChart", aprioriData, 10)
+          
+          barChart("#aprioriBarChart", aprioriData, d['key'] ,10)
         });
     
 }

@@ -1,7 +1,7 @@
 <?php
     function getCategory($select, $store, $timeFrom, $timeTo){
             
-        $link = mysqli_connect("localhost:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
+        $link = mysqli_connect("140.122.184.245:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
         #$sql = 'SELECT 說明, 等級,SUM(銷售額) 總銷售額, SUM(交易後庫存量) 總交易後庫存量,  SUM(售價) 總售價, SUM(銷售量) 總銷售量 FROM pharmacy WHERE 銷貨倉 =' .$store. ' GROUP BY 說明 ORDER BY ' .$order. ' DESC';
         $sql = 'SELECT 說明, SUM('.$select.') '.$select.' FROM pharmacy WHERE 銷貨倉 = '.$store.' AND 銷貨日期 >= '."'$timeFrom'".' AND 銷貨日期 <= '."'$timeTo'".' GROUP BY 說明 ORDER BY '.$select.' DESC';
         $result = mysqli_query($link, $sql);
@@ -20,7 +20,7 @@
     }
     function getSpecialKey($select, $store, $timeFrom, $timeTo){
             
-        $link = mysqli_connect("localhost:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
+        $link = mysqli_connect("140.122.184.245:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
         #$sql = 'SELECT 說明, 等級,SUM(銷售額) 總銷售額, SUM(交易後庫存量) 總交易後庫存量,  SUM(售價) 總售價, SUM(銷售量) 總銷售量 FROM pharmacy WHERE 銷貨倉 =' .$store. ' GROUP BY 說明 ORDER BY ' .$order. ' DESC';
         $sql = 'SELECT COUNT('.$select.') 總數, '.$select.' FROM pharmacy WHERE 銷貨倉 = '.$store.' AND 銷貨日期 >= '."'$timeFrom'".' AND 銷貨日期 <= '."'$timeTo'".' GROUP BY ' .$select. ' ORDER BY '.$select.' DESC';
         $result = mysqli_query($link, $sql);
@@ -39,7 +39,7 @@
     }
 
     function getCommodityByCategory($key, $select, $store, $timeFrom, $timeTo){
-        $link = mysqli_connect("localhost:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
+        $link = mysqli_connect("140.122.184.245:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
         $sql = 'SELECT 藥品名稱 ,SUM('.$select.') '.$select.' FROM pharmacy WHERE 說明 = ' ."'$key'". ' AND 銷貨倉 = '.$store.' AND 銷貨日期 >= '."'$timeFrom'".' AND 銷貨日期 <= '."'$timeTo'".' GROUP BY 藥品名稱 ORDER BY '.$select.' DESC';
         $commodity = mysqli_query($link, $sql);
         if(!$commodity){
@@ -56,7 +56,7 @@
     }
 
     function getAprioriFrimCommodity($key){
-        $link = mysqli_connect("localhost:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
+        $link = mysqli_connect("140.122.184.245:3307", "root", "", "pharmacy") or die("無法開啟MySQL資料庫連接!<br/>");
         $sql = 'SELECT rs , confidence FROM apriori WHERE ls = ' ."'$key'". ' ORDER BY confidence DESC';
         $commodity = mysqli_query($link, $sql);
         if(!$commodity){
